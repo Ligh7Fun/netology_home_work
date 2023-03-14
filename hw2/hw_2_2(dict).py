@@ -19,7 +19,10 @@ while True:
             print('Ваш знак зодиака: ', end='')
             print(signs[month][2]) if (day >= signs[month][0]) else print(
                 signs[month][1])
+            print('=' * 40, end='\n\n')
         else:
-            print(f'Числа "{day}" в этом месяце нет, попробуйте снова.')
+            print(f'Дня "{day}" в этом месяце нет, попробуйте снова.')
+            print('=' * 40, end='\n\n')
     except (KeyError, ValueError):
         print('Вы ошиблись при вводе данных, попробуйте снова.')
+        print('=' * 40, end='\n\n')
