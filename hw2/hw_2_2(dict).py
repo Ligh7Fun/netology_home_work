@@ -12,12 +12,14 @@ signs = {
     "ноябрь": (22, "Скорпион", "Стрелец", 30),
     "декабрь": (21, "Стрелец", "Козерог", 31),
 }
-month, day = input("Введите месяц: "), int(input("Введите день: "))
-try:
-    if day <= signs[month][3]:
-        print(signs[month][2]) if (day >= signs[month][0]) else print(
-            signs[month][1])
-    else:
-        print(f'Числа "{day}" в этом месяце нет, попробуйте снова.')
-except KeyError:
-    print('Вы ошиблись при вводе данных, попробуйте снова.')
+while True:
+    try:
+        month, day = input("Введите месяц: "), int(input("Введите день: "))
+        if day <= signs[month][3]:
+            print('Ваш знак зодиака: ', end='')
+            print(signs[month][2]) if (day >= signs[month][0]) else print(
+                signs[month][1])
+        else:
+            print(f'Числа "{day}" в этом месяце нет, попробуйте снова.')
+    except (KeyError, ValueError):
+        print('Вы ошиблись при вводе данных, попробуйте снова.')
