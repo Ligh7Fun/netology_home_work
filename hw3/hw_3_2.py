@@ -34,13 +34,13 @@ for dish, ingredients in cook_book:
     print(f'{dish.capitalize()}:')
     for ingredient, quantity, unit in ingredients:
         print(f'{ingredient}, {quantity * person}{unit}')
-    print(end='\n')
+    print()
 
-# второй вариант с индексами, но можно запутаться
+# второй вариант, немного помучать себя и всех кто это будет читать :)
 # for dish in range(len(cook_book)):
 #     print(f'{cook_book[dish][0].capitalize()}:')
 #     for ingredients in range(len(cook_book[dish][1])):
 #         print(f'{cook_book[dish][1][ingredients][0]}, '
 #               f'{cook_book[dish][1][ingredients][1] * person}'
 #               f'{cook_book[dish][1][ingredients][2]}')
-#     print(end='\n')
+#     print()

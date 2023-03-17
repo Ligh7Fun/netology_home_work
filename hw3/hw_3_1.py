@@ -7,8 +7,11 @@ if len(boys) != len(girls):
 else:
     boys.sort()
     girls.sort()
-    # либо если длины списков равны, отдельно создать список
-    # pairs = list(zip(sorted(boys), sorted(girls)))
-    # и итерироваться по данному списку
+
     for boy, girl in zip(boys, girls):
         print(f'{boy} и {girl}')
+    # либо можно создать создать список
+    # pairs = list(zip(sorted(boys), sorted(girls)))
+    # и итерироваться по данному списку(удалив 8 и 9 строки)
+    # for boy, girl in pairs:
+    #     print(f'{boy} и {girl}')
