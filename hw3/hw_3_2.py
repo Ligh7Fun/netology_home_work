@@ -30,9 +30,17 @@ cook_book = [
 ]
 person = 5
 
-for i in range(len(cook_book)):
-    print(f'{cook_book[i][0].capitalize()}:')
-    for j in range(len(cook_book[i][1])):
-        print(f'{cook_book[i][1][j][0]}, '
-              f'{cook_book[i][1][j][1] * person}{cook_book[i][1][j][2]}')
-    print('')
+for dish, ingredients in cook_book:
+    print(f'{dish.capitalize()}:')
+    for ingredient, quantity, unit in ingredients:
+        print(f'{ingredient}, {quantity * person}{unit}')
+    print(end='\n')
+
+# второй вариант с индексами, но можно запутаться
+# for dish in range(len(cook_book)):
+#     print(f'{cook_book[dish][0].capitalize()}:')
+#     for ingredients in range(len(cook_book[dish][1])):
+#         print(f'{cook_book[dish][1][ingredients][0]}, '
+#               f'{cook_book[dish][1][ingredients][1] * person}'
+#               f'{cook_book[dish][1][ingredients][2]}')
+#     print(end='\n')
