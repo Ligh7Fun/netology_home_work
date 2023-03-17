@@ -10,5 +10,5 @@ else:
     # либо если длины списков равны, отдельно создать список
     # pairs = list(zip(sorted(boys), sorted(girls)))
     # и итерироваться по данному списку
-    for unity_b, unity_g in zip(boys, girls):
-        print(f'{unity_b} и {unity_g}')
+    for boy, girl in zip(boys, girls):
+        print(f'{boy} и {girl}')
