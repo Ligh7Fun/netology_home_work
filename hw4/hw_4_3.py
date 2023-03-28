@@ -62,7 +62,7 @@ for id1 in range(len(mentors_names)):
                 # и список преподавателей, которые есть на обоих курсах
                 if pair not in pairs:
                     pairs.append(pair)
-                    # Отсортируйте имена по алфавиту. 
+                    # Отсортируйте имена по алфавиту.
                     # Подсказка: используйте sorted() для списка
                     all_names_sorted = sorted(intersection_set)
                     # Допишите конструкцию вывода результата.
