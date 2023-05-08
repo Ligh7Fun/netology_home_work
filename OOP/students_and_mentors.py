@@ -68,8 +68,6 @@ class Student(Person, AvgMixin):
         else:
             return 'Нельзя сравнить объекты разных классов!'
 
-    # def get_avg_grade(self) -> float:
-
     def add_course(self, course_name: str):
         if course_name not in self.courses_in_progress:
             self.courses_in_progress.append(course_name)
@@ -85,14 +83,14 @@ class Student(Person, AvgMixin):
             self.finished_courses.append(course_name)
         print(f'\nКурс "{course_name}" добавлен в завершенные.')
 
-    def add_grade(self, lector, course_name: str, grade: int):
+    def add_grade(self, lecturer, course_name: str, grade: int):
         if course_name in self.courses_in_progress and \
                 isinstance(grade, int) and \
                 1 <= grade <= 10 and \
-                course_name in lector.courses_attached and \
-                isinstance(lector, Lecturer):
-            lector.grades.setdefault(course_name, []).append(grade)
-            print(f'\nЛектору {lector.surname} {lector.name} '
+                course_name in lecturer.courses_attached and \
+                isinstance(lecturer, Lecturer):
+            lecturer.grades.setdefault(course_name, []).append(grade)
+            print(f'\nЛектору {lecturer.surname} {lecturer.name} '
                   f'для курса "{course_name}" добавлена оценка {grade}.')
         else:
             print('\nУказали некорректные данные!')
@@ -127,7 +125,8 @@ class Mentor(Person):
                 course in student.courses_in_progress:
             student.grades.setdefault(course, []).append(grade)
         else:
-            raise NotImplementedError('Данному объекту нет возможности выставлять оценки!')
+            raise NotImplementedError(
+                'Данному объекту нет возможности выставлять оценки!')
 
     def add_attached_course(self, course_name: str):
         if course_name not in self.courses_attached:
@@ -149,7 +148,8 @@ class Lecturer(Mentor, AvgMixin):
         self.grades = {}
 
     def rate_hw(self, student, course: str, grade: int):
-        raise NotImplementedError('Данному объекту нет возможности выставлять оценки!')
+        raise NotImplementedError(
+            'Данному объекту нет возможности выставлять оценки!')
 
     def __eq__(self, other):
         if isinstance(other, Lecturer):
@@ -205,6 +205,7 @@ class Reviewer(Mentor):
 
 def get_course_grades_avg(students: list[Student], course_name: str) -> float:
     """Функция для подсчета средней оценки за ДЗ в рамках указанного курса"""
+
     grades = []
     for student in students:
         if course_name in student.courses_in_progress:
@@ -213,8 +214,11 @@ def get_course_grades_avg(students: list[Student], course_name: str) -> float:
     return round(sum(grades) / len(grades), 1)
 
 
-def get_course_lectures_grades_avg(lecturers: list[Lecturer], course_name: str) -> float:
-    """Функция для подсчета средней оценки за лекции в рамках указанного курса"""
+def get_course_lectures_grades_avg(lecturers: list[Lecturer],
+                                   course_name: str) -> float:
+    """Функция для подсчета средней оценки за лекции в рамках
+    указанного курса"""
+
     grades = []
     for lecturer in lecturers:
         if course_name in lecturer.courses_attached:
