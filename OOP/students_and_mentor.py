@@ -1,6 +1,7 @@
-#  узнать как указать тип объеекта "класс" который описан ниже
+#  узнать как указать тип объекта "класс" который описан ниже
 class Person:
     """Базовый класс для всех людей"""
+
     def __init__(self, name: str, surname: str):
         self.name = name
         self.surname = surname
@@ -9,8 +10,22 @@ class Person:
         return f'\nИмя: {self.name}\nФамилия: {self.surname}'
 
 
-class Student(Person):
+class MixinAvg:
+    """Класс для функции подсчета средней оценки"""
+
+    def get_avg_grade(self) -> float:
+        if len(self.grades.values()):
+            grades = []
+            for grade in self.grades.values():
+                grades += grade
+            return round(sum(grades) / len(grades), 1)
+        else:
+            return .0
+
+
+class Student(Person, MixinAvg):
     """Класс студентов"""
+
     def __init__(self, name: str, surname: str, gender: str):
         super().__init__(name, surname)
         self.gender = gender
@@ -54,14 +69,14 @@ class Student(Person):
         else:
             return 'Нельзя сравнить объекты разных классов!'
 
-    def get_avg_grade(self):
-        if len(self.grades.values()):
-            grades = []
-            for grade in self.grades.values():
-                grades += grade
-            return round(sum(grades) / len(grades), 1)
-        else:
-            return 0
+    # def get_avg_grade(self) -> float:
+    #     if len(self.grades.values()):
+    #         grades = []
+    #         for grade in self.grades.values():
+    #             grades += grade
+    #         return round(sum(grades) / len(grades), 1)
+    #     else:
+    #         return .0
 
     def add_course(self, course_name: str):
         if course_name not in self.courses_in_progress:
@@ -109,6 +124,7 @@ class Student(Person):
 
 class Mentor(Person):
     """Класс наставников"""
+
     def __init__(self, name: str, surname: str):
         super().__init__(name, surname)
         self.courses_attached = []
@@ -132,8 +148,9 @@ class Mentor(Person):
         return f'\n{super().__str__()}'
 
 
-class Lecturer(Mentor):
+class Lecturer(Mentor, MixinAvg):
     """Класс лекторов"""
+
     def __init__(self, name: str, surname: str):
         super().__init__(name, surname)
         self.courses_attached = []
@@ -182,18 +199,10 @@ class Lecturer(Mentor):
         return f'{super().__str__()}\n' \
                f'Средняя оценка за лекции: {self.get_avg_grade()}'
 
-    def get_avg_grade(self):
-        if len(self.grades.values()):
-            grades = []
-            for grade in self.grades.values():
-                grades += grade
-            return round(sum(grades) / len(grades), 1)
-        else:
-            return 0
-
 
 class Reviewer(Mentor):
     """Класс проверяющих(ревьюверов)"""
+
     def __init__(self, name: str, surname: str):
         super().__init__(name, surname)
         self.courses_attached = []
@@ -202,16 +211,14 @@ class Reviewer(Mentor):
         return f'{super().__str__()}'
 
 
-def get_course_grades(students: Student, course_name: str) -> float:
+def get_course_grades(students: list[Student], course_name: str) -> float:
     grades = []
     for student in students:
         if course_name in student.courses_in_progress:
-            grades += student.grades[course_name]
+            grades.append(student.get_avg_grade())
 
-        if len(grades) > 0:
-            return sum(grades) / len(grades)
-        else:
-            return .0
+    return round(sum(grades) / len(grades), 1)
+
 
 def get_course_lectures_rating_avg(lecturers: Lecturer, course_name: str):
     pass
@@ -220,6 +227,7 @@ def get_course_lectures_rating_avg(lecturers: Lecturer, course_name: str):
 if __name__ == "__main__":
     student1 = Student('Ivan', 'Petrov', 'Male')
     student2 = Student('Maria', 'Ivanova', 'Female')
+    student3 = Student('Sveta', 'Sidorova', 'Female')
 
     lector1 = Lecturer('Petr', 'Ivanov')
     lector2 = Lecturer('Vlad', 'Smirnov')
@@ -231,6 +239,7 @@ if __name__ == "__main__":
     student1.add_finish_course('C')
     student2.add_course('C++')
     student2.add_finish_course('Perl')
+    student3.add_course('Python')
     student1.add_grade(lector1, 'Python', 5)
     student1.add_grade(lector1, 'Python', 9)
     student1.add_grade(lector2, 'Python', 3)
@@ -245,6 +254,10 @@ if __name__ == "__main__":
     reviewer1.rate_hw(student1, 'Python', 7)
     reviewer1.rate_hw(student1, 'Python', 10)
 
+    reviewer1.rate_hw(student3, 'Python', 3)
+    reviewer1.rate_hw(student3, 'Python', 7)
+    reviewer1.rate_hw(student3, 'Python', 9)
+
     reviewer2.rate_hw(student2, 'C++', 4)
     reviewer2.rate_hw(student2, 'C++', 6)
     reviewer2.rate_hw(student2, 'C++', 9)
@@ -255,7 +268,11 @@ if __name__ == "__main__":
 
     print(student1)
     print(student2)
+    print(student3)
     print(lector1)
     print(lector2)
     print(reviewer1)
     print(reviewer2)
+
+    print(f'\nСредний балл {get_course_grades([student1, student3], "Python")} по предмету Python')
+    print(f'\nСредний балл {get_course_grades([student1, student3, student2], "C++")} по предмету C++')
