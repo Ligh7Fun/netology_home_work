@@ -1,4 +1,3 @@
-#  узнать как указать тип объекта "класс" который описан ниже
 class Person:
     """Базовый класс для всех людей"""
 
@@ -10,7 +9,7 @@ class Person:
         return f'\nИмя: {self.name}\nФамилия: {self.surname}'
 
 
-class MixinAvg:
+class AvgMixin:
     """Класс для функции подсчета средней оценки"""
 
     def get_avg_grade(self) -> float:
@@ -23,7 +22,7 @@ class MixinAvg:
             return .0
 
 
-class Student(Person, MixinAvg):
+class Student(Person, AvgMixin):
     """Класс студентов"""
 
     def __init__(self, name: str, surname: str, gender: str):
@@ -70,13 +69,6 @@ class Student(Person, MixinAvg):
             return 'Нельзя сравнить объекты разных классов!'
 
     # def get_avg_grade(self) -> float:
-    #     if len(self.grades.values()):
-    #         grades = []
-    #         for grade in self.grades.values():
-    #             grades += grade
-    #         return round(sum(grades) / len(grades), 1)
-    #     else:
-    #         return .0
 
     def add_course(self, course_name: str):
         if course_name not in self.courses_in_progress:
@@ -148,7 +140,7 @@ class Mentor(Person):
         return f'\n{super().__str__()}'
 
 
-class Lecturer(Mentor, MixinAvg):
+class Lecturer(Mentor, AvgMixin):
     """Класс лекторов"""
 
     def __init__(self, name: str, surname: str):
@@ -211,7 +203,8 @@ class Reviewer(Mentor):
         return f'{super().__str__()}'
 
 
-def get_course_grades(students: list[Student], course_name: str) -> float:
+def get_course_grades_avg(students: list[Student], course_name: str) -> float:
+    """Функция для подсчета средней оценки за ДЗ в рамках указанного курса"""
     grades = []
     for student in students:
         if course_name in student.courses_in_progress:
@@ -220,8 +213,14 @@ def get_course_grades(students: list[Student], course_name: str) -> float:
     return round(sum(grades) / len(grades), 1)
 
 
-def get_course_lectures_rating_avg(lecturers: Lecturer, course_name: str):
-    pass
+def get_course_lectures_grades_avg(lecturers: list[Lecturer], course_name: str) -> float:
+    """Функция для подсчета средней оценки за лекции в рамках указанного курса"""
+    grades = []
+    for lecturer in lecturers:
+        if course_name in lecturer.courses_attached:
+            grades.append(lecturer.get_avg_grade())
+
+    return round(sum(grades) / len(grades), 1)
 
 
 if __name__ == "__main__":
@@ -274,5 +273,7 @@ if __name__ == "__main__":
     print(reviewer1)
     print(reviewer2)
 
-    print(f'\nСредний балл {get_course_grades([student1, student3], "Python")} по предмету Python')
-    print(f'\nСредний балл {get_course_grades([student1, student3, student2], "C++")} по предмету C++')
+    print(f'\nСредний балл {get_course_grades_avg([student1, student3], "Python")} по курсу Python')
+    print(f'\nСредний балл {get_course_grades_avg([student1, student3, student2], "C++")} по курсу C++')
+    print(f'\nСредний балл лекторов {get_course_lectures_grades_avg([lector1, lector2], "Python")} по курсу Python')
+    print(f'\nСредний балл лекторов {get_course_lectures_grades_avg([lector1, lector2], "C++")} по курсу C++')
