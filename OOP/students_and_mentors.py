@@ -83,7 +83,7 @@ class Student(Person, AvgMixin):
             self.finished_courses.append(course_name)
         print(f'\nКурс "{course_name}" добавлен в завершенные.')
 
-    def add_grade(self, lecturer, course_name: str, grade: int):
+    def add_grade(self, lecturer: 'Lecturer', course_name: str, grade: int):
         if course_name in self.courses_in_progress and \
                 isinstance(grade, int) and \
                 1 <= grade <= 10 and \
