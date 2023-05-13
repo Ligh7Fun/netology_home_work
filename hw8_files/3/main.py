@@ -18,7 +18,7 @@ for file in files:
 
 info_sorted = sorted(info.items(), key=lambda x: x[1]['length'])
 
-with open('result.txt', 'w', encoding='utf-8') as f:
+with open(file_result, 'w', encoding='utf-8') as f:
     for file_name, file_info in info_sorted:
         f.write(file_name + '\n')
         f.write(str(file_info['length']) + '\n')
