@@ -1,6 +1,5 @@
 import datetime
 import time
-
 import requests
 
 tags = 'Python'
@@ -9,7 +8,6 @@ days = 2
 page = 1
 pagesize = 100
 has_more = True
-
 count_questions = 0
 
 now = datetime.datetime.today()
@@ -29,8 +27,8 @@ while has_more:
     for index, item in enumerate(request["items"], start=1):
         print(f'====== Question {index}/{len(request["items"])} ======')
         print(f'Author: {item["owner"]["display_name"]}\nTitle: {item["title"]}\nLink: {item["link"]}\n')
-        count_questions += 1
 
+    count_questions += len(request["items"])
     has_more = request["has_more"]
     page += 1
 
