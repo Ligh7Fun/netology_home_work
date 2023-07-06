@@ -5,3 +5,5 @@ OOP/.ipynb_checkpoints
 hw8/settings.py
 hw8/__pycache__
 .vscode
+hw13/.env
+hw13/logs.log
