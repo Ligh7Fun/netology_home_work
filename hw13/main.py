@@ -1,4 +1,3 @@
-# import psycopg2
 import psycopg2.extensions
 import os
 from dotenv import load_dotenv
@@ -18,16 +17,6 @@ class Logger:
         print(f'[{timestamp}][{type_log}] {message}')
         with open(self.filename, 'a') as file:
             file.write(log_message + '\n')
-
-
-log = Logger()
-
-load_dotenv()
-DB_NAME = os.getenv('DB_NAME')
-DB_USER = os.getenv('DB_USER')
-DB_PASSWORD = os.getenv('DB_PASSWORD')
-DB_HOST = os.getenv('DB_HOST')
-DB_PORT = os.getenv('DB_PORT')
 
 
 def create_db(connection: psycopg2.extensions.connection) -> None:
@@ -102,6 +91,7 @@ def add_phone(connection: psycopg2.extensions.connection,
                 VALUES (%s, %s);
             """, (phone_number, user_id))
             connection.commit()
+            find_client(connection=connection, user_id=user_id)
             log.add('INFO', f'add_phone {phone_number}: OK')
         except Exception as e:
             log.add('ERROR', f'add_phone: {e}')
@@ -131,13 +121,12 @@ def show_clients_all(connection: psycopg2.extensions.connection) -> None:
 
 
 def find_client(connection: psycopg2.extensions.connection,
-                user_id: str = None,
+                user_id: str | int = None,
                 first_name: str = None,
                 last_name: str = None,
                 email: str = None,
                 phone_number: str = None
                 ) -> None:
-
     with connection.cursor() as cursor:
         try:
             base_query = """
@@ -186,7 +175,48 @@ def find_client(connection: psycopg2.extensions.connection,
 
 def change_client(connection: psycopg2.extensions.connection,
                   user_id: str):
-    pass
+    with connection.cursor() as cursor:
+        print(f'Leave the field blank if no changes are required.')
+        first_name = input('First name: ')
+        last_name = input('Last name: ')
+        email = input('Email: ')
+        phone_number = input('Phone number: ')
+
+        try:
+            query_params = []
+            query = []
+            base_query = f"UPDATE users SET "
+            base_query_phone = f"UPDATE phones SET"
+            if first_name:
+                query.append('first_name = %s')
+                query_params.append(first_name)
+            if last_name:
+                query.append(f'last_name = %s')
+                query_params.append(last_name)
+            if email:
+                query.append(f'email = %s')
+                query_params.append(email)
+            base_query += ', '.join(query)
+            query_params.append(user_id)
+            base_query += f" WHERE id = %s;"
+            print(base_query)
+            if first_name or last_name or email:
+                cursor.execute(base_query, query_params)
+                connection.commit()
+
+            if phone_number:
+                base_query_phone += f" phone_number = %s"
+                base_query_phone += " WHERE user_id = %s;"
+                query_params_phone = (phone_number, user_id)
+                print(base_query_phone)
+                cursor.execute(base_query_phone, query_params_phone)
+
+
+
+            log.add('INFO', f'change_client: OK')
+            find_client(connection=connection, user_id=user_id)
+        except Exception as e:
+            log.add('ERROR', f'change_client: {e}')
 
 
 def delete_phone(connection: psycopg2.extensions.connection,
@@ -229,66 +259,76 @@ def main_menu():
 
 
 def press_enter():
-    input('Press Enter for continue...')
+    input('Press Enter for continue...\n')
 
 
-with psycopg2.connect(database=DB_NAME,
-                      user=DB_USER,
-                      password=DB_PASSWORD,
-                      host=DB_HOST,
-                      port=DB_PORT) as conn:
-    with conn.cursor() as cur:
-        create_db(conn)
-        menu = -1
-        try:
-            while menu != 0:
-                main_menu()
-                print('Press "0" for exit.')
-                try:
-                    menu = int(input('Enter menu position: ').strip())
-                except ValueError:
-                    print("Incorrect input! Please enter numbers only.")
-                if menu == 1:
-                    show_clients_all(connection=conn)
-                    press_enter()
-                elif menu == 2:
-                    add_client(connection=conn,
-                               first_name=input('Enter first name: '),
-                               last_name=input('Enter last name: '),
-                               email=input('Enter email: '),
-                               phone_number=input(
-                                   'Enter phone number(optional): ')
-                               )
-                    press_enter()
-                elif menu == 3:
-                    add_phone(connection=conn,
-                              user_id=input('Enter User ID: '),
-                              phone_number=input('Enter phone number: '))
-                    press_enter()
-                elif menu == 4:
+if __name__ == '__main__':
+    log = Logger()
+    load_dotenv()
+    DB_NAME = os.getenv('DB_NAME')
+    DB_USER = os.getenv('DB_USER')
+    DB_PASSWORD = os.getenv('DB_PASSWORD')
+    DB_HOST = os.getenv('DB_HOST')
+    DB_PORT = os.getenv('DB_PORT')
+    with psycopg2.connect(database=DB_NAME,
+                          user=DB_USER,
+                          password=DB_PASSWORD,
+                          host=DB_HOST,
+                          port=DB_PORT) as conn:
+        with conn.cursor() as cur:
+            create_db(conn)
+            menu = -1
+            try:
+                while menu != 0:
+                    main_menu()
+                    print('Press "0" for exit.')
+                    try:
+                        menu = int(input('Enter menu position: ').strip())
+                    except ValueError:
+                        print("Incorrect input! Please enter numbers only.")
+                    if menu == 1:
+                        show_clients_all(connection=conn)
+                        press_enter()
+                    elif menu == 2:
+                        add_client(connection=conn,
+                                   first_name=input('Enter first name: '),
+                                   last_name=input('Enter last name: '),
+                                   email=input('Enter email: '),
+                                   phone_number=input(
+                                       'Enter phone number(optional): ')
+                                   )
+                        press_enter()
+                    elif menu == 3:
+                        add_phone(connection=conn,
+                                  user_id=input('Enter User ID: '),
+                                  phone_number=input('Enter phone number: '))
+                        press_enter()
+                    elif menu == 4:
+                        change_client(connection=conn,
+                                      user_id=input('Enter User ID: '))
+                        press_enter()
+                    elif menu == 5:
+                        delete_phone(connection=conn,
+                                     phone_number=input(
+                                         'Enter phone number: '))
+                        press_enter()
+                    elif menu == 6:
+                        show_clients_all(connection=conn)
+                        delete_client(connection=conn,
+                                      user_id=input('Enter User ID: '))
+                        press_enter()
+                    elif menu == 7:
+                        find_client(connection=conn,
+                                    user_id=input('Enter User ID: '),
+                                    first_name=input('Enter first name: '),
+                                    last_name=input('Enter last name: '),
+                                    email=input('Enter email: '),
+                                    phone_number=input(
+                                        'Enter phone number(optional): ')
+                                    )
+                        press_enter()
 
-                    press_enter()
-                elif menu == 5:
-                    delete_phone(connection=conn,
-                                 phone_number=input('Enter phone number: '))
-                    press_enter()
-                elif menu == 6:
-                    show_clients_all(connection=conn)
-                    delete_client(connection=conn,
-                                  user_id=input('Enter User ID: '))
-                    press_enter()
-                elif menu == 7:
-                    find_client(connection=conn,
-                                user_id=input('Enter User ID: '),
-                                first_name=input('Enter first name: '),
-                                last_name=input('Enter last name: '),
-                                email=input('Enter email: '),
-                                phone_number=input(
-                                    'Enter phone number(optional): ')
-                                )
-                    press_enter()
+            except Exception as err:
+                log.add('ERROR', f'main menu: {err}')
 
-        except Exception as e:
-            log.add('ERROR', f'main menu: {e}')
-
-conn.close()
+    conn.close()
