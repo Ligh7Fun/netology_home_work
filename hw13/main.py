@@ -19,6 +19,10 @@ class Logger:
             file.write(log_message + '\n')
 
 
+def input_with_pretext(prompt: str, pre_text: str) -> str:
+    return input(f"{prompt} [{pre_text}]: ") or pre_text
+
+
 def create_db(connection: psycopg2.extensions.connection) -> None:
     with connection.cursor() as cursor:
         cursor.execute("""
@@ -61,23 +65,6 @@ def add_client(connection: psycopg2.extensions.connection,
             find_client(connection=connection, user_id=user_id_)
         except Exception as e:
             log.add('ERROR', f'add_client: {e}')
-
-
-def get_user_id(connection: psycopg2.extensions.connection,
-                email: str) -> int | None:
-    """
-    Получаем user_id по email адресу пользователя
-    """
-    with connection.cursor() as cursor:
-        try:
-            cursor.execute("""
-                SELECT id FROM users WHERE email=%s;
-            """, (email,))
-            connection.commit()
-            log.add('INFO', f'get_user_id: OK')
-            return int(cursor.fetchone()[0]) if cursor.rowcount else None
-        except Exception as e:
-            log.add('ERROR', f'get_user_id: {e}')
 
 
 def add_phone(connection: psycopg2.extensions.connection,
@@ -130,15 +117,15 @@ def find_client(connection: psycopg2.extensions.connection,
     with connection.cursor() as cursor:
         try:
             base_query = """
-                            SELECT 
-                                u.id,
-                                MAX(u.first_name) "first name",
-                                MAX(u.last_name) "last name",
-                                u.email,
-                                STRING_AGG(p.phone_number, '\n ') "phone numbers"
-                            FROM users u
-                            LEFT JOIN phones p ON u.id = p.user_id
-                            """
+                SELECT 
+                    u.id,
+                    MAX(u.first_name) "first name",
+                    MAX(u.last_name) "last name",
+                    u.email,
+                    STRING_AGG(p.phone_number, '\n ') "phone numbers"
+                FROM users u
+                LEFT JOIN phones p ON u.id = p.user_id
+                """
 
             query_params = []
 
@@ -177,41 +164,36 @@ def change_client(connection: psycopg2.extensions.connection,
                   user_id: str):
     with connection.cursor() as cursor:
         print(f'Leave the field blank if no changes are required.')
-        first_name = input('First name: ')
-        last_name = input('Last name: ')
-        email = input('Email: ')
-        phone_number = input('Phone number: ')
-
         try:
-            query_params = []
-            query = []
-            base_query = f"UPDATE users SET "
-            base_query_phone = f"UPDATE phones SET"
-            if first_name:
-                query.append('first_name = %s')
-                query_params.append(first_name)
-            if last_name:
-                query.append(f'last_name = %s')
-                query_params.append(last_name)
-            if email:
-                query.append(f'email = %s')
-                query_params.append(email)
-            base_query += ', '.join(query)
-            query_params.append(user_id)
-            base_query += f" WHERE id = %s;"
-            print(base_query)
-            if first_name or last_name or email:
-                cursor.execute(base_query, query_params)
-                connection.commit()
+            cursor.execute("""
+                SELECT * FROM users WHERE id=%s;
+            """, (user_id,))
+            users = cursor.fetchone()
+            cursor.execute("""
+                SELECT * FROM phones WHERE user_id=%s;
+            """, (user_id,))
+            phones = cursor.fetchall()
+            connection.commit()
+        except Exception as e:
+            log.add('ERROR', f'change_client: {e}')
 
-            if phone_number:
-                base_query_phone += f" phone_number = %s"
-                base_query_phone += " WHERE user_id = %s;"
-                query_params_phone = (phone_number, user_id)
-                print(base_query_phone)
-                cursor.execute(base_query_phone, query_params_phone)
-
-
+        first_name = input_with_pretext('First name:', users[1])
+        last_name = input_with_pretext('Last name:', users[2])
+        email = input_with_pretext('Email:', users[3])
+        phone_list = [phone[1] for phone in phones]
+        phone_number_select = input_with_pretext('Phone number for change: ',
+                                                 ', '.join(phone_list))
+        new_phone_number = input('New phone number: ')
+        try:
+            cursor.execute("""
+                UPDATE users SET first_name = %s, last_name = %s, email = %s
+                WHERE id=%s;
+            """, (first_name, last_name, email, user_id))
+            cursor.execute("""
+                UPDATE phones SET phone_number = %s 
+                WHERE user_id = %s AND phone_number = %s;
+            """, (new_phone_number, user_id, phone_number_select))
+            connection.commit()
 
             log.add('INFO', f'change_client: OK')
             find_client(connection=connection, user_id=user_id)
