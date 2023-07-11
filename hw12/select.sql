@@ -7,7 +7,7 @@ WHERE duration = (SELECT max(duration) FROM tracks);
 -- Название треков, продолжительность которых не менее 3,5 минут.
 SELECT name
 FROM tracks
-WHERE duration > 210;
+WHERE duration >= 210;
 
 -- Названия сборников, вышедших в период с 2018 по 2020 год включительно.
 SELECT name
@@ -21,9 +21,19 @@ FROM artists
 WHERE name NOT LIKE '% %';
 
 -- Название треков, которые содержат слово «мой» или «my».
+-- Основной способ реализации на основе полученных знаний
 SELECT name
 FROM tracks
-WHERE LOWER(name) LIKE '%my%' OR LOWER(name) LIKE '%мой%';
+WHERE name ILIKE 'my %' OR name ILIKE '% my %' OR name ILIKE 'my' OR name ILIKE '% my'
+OR name ILIKE 'мой %' OR name ILIKE '% мой %' OR name ILIKE 'мой' OR name ILIKE '% мой';
+
+-- Дополнительные необязательные способы реализации
+-- При помощи следующих инструментов: string_to_array, lower и &&.
+SELECT name FROM tracks
+WHERE string_to_array(lower(name), ' ') && ARRAY['my', 'мой'];
+
+-- При помощи регулярного выражения:
+SELECT name FROM tracks WHERE name ~* '[[:<:]](my|мой)[[:>:]]';
 
 
 -- Задание 3
